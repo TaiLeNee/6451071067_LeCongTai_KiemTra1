@@ -1,3 +1,5 @@
+import pytest
+
 from tests.login.support import assert_authenticated, assert_rejected, require_env
 
 
@@ -78,3 +80,16 @@ def test_lg10_whitespace_password(login_page):
     assert data["UTC_TEST_PASSWORD"] != "   "
     login_page.login(data["UTC_TEST_USERNAME"], "   ")
     assert_rejected(login_page, data["UTC_INVALID_CREDENTIALS_TEXT"])
+
+
+def test_lg11_enter_submits_valid_login(login_page):
+    data = require_env(
+        "UTC_TEST_USERNAME", "UTC_TEST_PASSWORD",
+        "UTC_AUTH_IDENTITY_SELECTOR", "UTC_AUTH_IDENTITY_TEXT",
+        "UTC_ENTER_SUPPORTED",
+    )
+    if data["UTC_ENTER_SUPPORTED"].lower() != "yes":
+        pytest.skip("Not Applicable: Enter submission is not specified")
+    login_page.fill_credentials(data["UTC_TEST_USERNAME"], data["UTC_TEST_PASSWORD"])
+    login_page.submit_with_enter()
+    assert_authenticated(login_page.driver)
