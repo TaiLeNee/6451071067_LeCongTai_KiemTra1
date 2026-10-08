@@ -210,3 +210,11 @@ def test_lg18_refresh_keeps_authenticated_session(login_page):
     assert_authenticated(login_page.driver)
     login_page.driver.refresh()
     assert_authenticated(login_page.driver)
+
+
+def test_lg19_protected_page_requires_login(driver):
+    data = require_env("UTC_PROTECTED_URL")
+    driver.get(data["UTC_PROTECTED_URL"])
+    WebDriverWait(driver, 10).until(EC.url_contains("/Login"))
+    assert driver.current_url.rstrip("/").endswith("/Login")
+    assert driver.find_element(By.NAME, "username").is_displayed()
