@@ -1,3 +1,5 @@
+from selenium.webdriver.common.keys import Keys
+
 from urllib.parse import urlparse
 
 from selenium.webdriver.common.by import By
@@ -185,3 +187,15 @@ def test_lg16_email_login_navigation(login_page):
         lambda driver: urlparse(driver.current_url).hostname == "accounts.google.com"
     )
     assert login_page.driver.find_element(By.TAG_NAME, "body").is_displayed()
+
+
+def test_lg17_keyboard_navigation_and_entry(login_page):
+    username = login_page.visible(login_page._USERNAME)
+    password = login_page.visible(login_page._PASSWORD)
+    username.click()
+    username.send_keys("keyboard_test", Keys.TAB)
+    assert login_page.driver.switch_to.active_element == password
+    password.send_keys("sample-password", Keys.SHIFT, Keys.TAB)
+    assert login_page.driver.switch_to.active_element == username
+    assert login_page.username_value() == "keyboard_test"
+    assert login_page.password_value() == "sample-password"
