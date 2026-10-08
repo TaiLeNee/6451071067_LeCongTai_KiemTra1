@@ -1,3 +1,8 @@
+import tempfile
+
+from selenium import webdriver
+from pages.login_page import LoginPage
+
 import pytest
 
 from tests.login.support import assert_authenticated, assert_rejected, require_env
@@ -115,3 +120,37 @@ def test_lg13_remember_checkbox_toggles(login_page):
     assert login_page.is_remember_selected() is not initial
     login_page.set_remember(initial)
     assert login_page.is_remember_selected() is initial
+
+
+def test_lg14_remember_session_after_browser_restart(pytestconfig):
+    data = require_env(
+        "UTC_TEST_USERNAME", "UTC_TEST_PASSWORD",
+        "UTC_AUTH_IDENTITY_SELECTOR", "UTC_AUTH_IDENTITY_TEXT",
+        "UTC_PROTECTED_URL", "UTC_REMEMBER_POLICY",
+    )
+    if data["UTC_REMEMBER_POLICY"].lower() != "retain":
+        pytest.skip("Not Applicable: configured remember policy is not retain")
+    with tempfile.TemporaryDirectory(prefix="utc-login-") as profile:
+        def open_browser():
+            options = webdriver.ChromeOptions()
+            options.add_argument("--window-size=1440,900")
+            options.add_argument(f"--user-data-dir={profile}")
+            if pytestconfig.getoption("--headless"):
+                options.add_argument("--headless=new")
+            return webdriver.Chrome(options=options)
+
+        first = open_browser()
+        try:
+            page = LoginPage(first).open()
+            page.set_remember(True)
+            page.login(data["UTC_TEST_USERNAME"], data["UTC_TEST_PASSWORD"])
+            assert_authenticated(first)
+        finally:
+            first.quit()
+
+        second = open_browser()
+        try:
+            second.get(data["UTC_PROTECTED_URL"])
+            assert_authenticated(second)
+        finally:
+            second.quit()
