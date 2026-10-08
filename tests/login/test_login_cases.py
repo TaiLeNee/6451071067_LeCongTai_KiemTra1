@@ -322,3 +322,28 @@ def test_lg24_disabled_account_is_rejected(login_page):
         data["UTC_DISABLED_USERNAME"], data["UTC_DISABLED_PASSWORD"]
     )
     assert_rejected(login_page, data["UTC_DISABLED_ERROR_TEXT"])
+
+
+def test_lg25_lockout_after_repeated_failures(login_page):
+    data = require_env(
+        "UTC_ALLOW_LOCKOUT_TEST", "UTC_LOCKOUT_RESET_READY",
+        "UTC_LOCKOUT_USERNAME", "UTC_LOCKOUT_PASSWORD",
+        "UTC_LOCKOUT_WRONG_PASSWORD", "UTC_LOCK_THRESHOLD",
+        "UTC_LOCKOUT_ERROR_TEXT",
+    )
+    if data["UTC_ALLOW_LOCKOUT_TEST"] != "1" or data["UTC_LOCKOUT_RESET_READY"] != "1":
+        pytest.skip("Blocked: lockout test requires an isolated reset account and opt-in")
+    assert data["UTC_LOCKOUT_PASSWORD"] != data["UTC_LOCKOUT_WRONG_PASSWORD"]
+    threshold = int(data["UTC_LOCK_THRESHOLD"])
+    assert threshold >= 2
+    for attempt in range(1, threshold + 1):
+        login_page.login(
+            data["UTC_LOCKOUT_USERNAME"], data["UTC_LOCKOUT_WRONG_PASSWORD"]
+        )
+        error = assert_rejected(login_page)
+        if attempt == threshold:
+            assert data["UTC_LOCKOUT_ERROR_TEXT"] in error
+    login_page.login(
+        data["UTC_LOCKOUT_USERNAME"], data["UTC_LOCKOUT_PASSWORD"]
+    )
+    assert_rejected(login_page, data["UTC_LOCKOUT_ERROR_TEXT"])
