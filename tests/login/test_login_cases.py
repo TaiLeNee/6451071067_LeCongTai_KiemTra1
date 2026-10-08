@@ -278,3 +278,36 @@ def test_lg22_username_case_policy(login_page):
         assert_authenticated(login_page.driver)
     else:
         assert_rejected(login_page, data["UTC_INVALID_CREDENTIALS_TEXT"])
+
+
+@pytest.mark.parametrize("field", ["username", "password"])
+def test_lg23_input_length_boundaries(login_page, field):
+    key = field.upper()
+    data = require_env(f"UTC_MAX_{key}", f"UTC_LENGTH_MODE_{key}")
+    maximum = int(data[f"UTC_MAX_{key}"])
+    assert maximum > 1
+    mode = data[f"UTC_LENGTH_MODE_{key}"].lower()
+    assert mode in {"truncate", "reject"}
+    overflow_text = None
+    if mode == "reject":
+        overflow_text = require_env(
+            f"UTC_LENGTH_OVERFLOW_TEXT_{key}"
+        )[f"UTC_LENGTH_OVERFLOW_TEXT_{key}"]
+    for length in (maximum - 1, maximum, maximum + 1):
+        login_page.open()
+        value = "a" * length
+        username = value if field == "username" else "test_validation"
+        password = value if field == "password" else "sample-password"
+        login_page.fill_credentials(username, password)
+        actual = (
+            login_page.username_value()
+            if field == "username" else login_page.password_value()
+        )
+        if length <= maximum:
+            assert actual == value
+        elif mode == "truncate":
+            assert actual == value[:maximum]
+        else:
+            assert actual == value
+            login_page.submit()
+            assert_rejected(login_page, overflow_text)
