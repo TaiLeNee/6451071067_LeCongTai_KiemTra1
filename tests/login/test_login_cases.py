@@ -311,3 +311,14 @@ def test_lg23_input_length_boundaries(login_page, field):
             assert actual == value
             login_page.submit()
             assert_rejected(login_page, overflow_text)
+
+
+def test_lg24_disabled_account_is_rejected(login_page):
+    data = require_env(
+        "UTC_DISABLED_USERNAME", "UTC_DISABLED_PASSWORD",
+        "UTC_DISABLED_ERROR_TEXT",
+    )
+    login_page.login(
+        data["UTC_DISABLED_USERNAME"], data["UTC_DISABLED_PASSWORD"]
+    )
+    assert_rejected(login_page, data["UTC_DISABLED_ERROR_TEXT"])
