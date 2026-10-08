@@ -238,3 +238,22 @@ def test_lg20_logout_revokes_protected_access(login_page):
     login_page.driver.refresh()
     assert login_page.driver.current_url.rstrip("/").endswith("/Login")
     assert login_page.driver.find_element(By.NAME, "username").is_displayed()
+
+
+def test_lg21_username_edge_whitespace_policy(login_page):
+    data = require_env(
+        "UTC_TEST_USERNAME", "UTC_TEST_PASSWORD",
+        "UTC_USERNAME_TRIM_POLICY",
+    )
+    policy = data["UTC_USERNAME_TRIM_POLICY"].lower()
+    assert policy in {"trim", "reject"}
+    if policy == "trim":
+        require_env("UTC_AUTH_IDENTITY_SELECTOR", "UTC_AUTH_IDENTITY_TEXT")
+    else:
+        require_env("UTC_INVALID_CREDENTIALS_TEXT")
+    username = f'  {data["UTC_TEST_USERNAME"]}  '
+    login_page.login(username, data["UTC_TEST_PASSWORD"])
+    if policy == "trim":
+        assert_authenticated(login_page.driver)
+    else:
+        assert_rejected(login_page, data["UTC_INVALID_CREDENTIALS_TEXT"])
