@@ -1,3 +1,7 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 import tempfile
 
 from selenium import webdriver
@@ -154,3 +158,14 @@ def test_lg14_remember_session_after_browser_restart(pytestconfig):
             assert_authenticated(second)
         finally:
             second.quit()
+
+
+def test_lg15_forgot_password_navigation(login_page):
+    login_page.forgot_password()
+    WebDriverWait(login_page.driver, 10).until(
+        EC.url_contains("/Login/GetPass")
+    )
+    assert login_page.driver.current_url.endswith("/Login/GetPass")
+    recovery = login_page.driver.find_element(By.TAG_NAME, "body").text
+    assert "Trở lại đăng nhập?" in recovery
+    assert login_page.driver.find_elements(By.CSS_SELECTOR, "input")
