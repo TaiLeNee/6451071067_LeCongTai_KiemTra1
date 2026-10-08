@@ -107,3 +107,11 @@ def test_lg12_retry_after_wrong_password(login_page):
     login_page.fill_credentials(data["UTC_TEST_USERNAME"], data["UTC_TEST_PASSWORD"])
     login_page.submit()
     assert_authenticated(login_page.driver)
+
+
+def test_lg13_remember_checkbox_toggles(login_page):
+    initial = login_page.is_remember_selected()
+    login_page.set_remember(not initial)
+    assert login_page.is_remember_selected() is not initial
+    login_page.set_remember(initial)
+    assert login_page.is_remember_selected() is initial
