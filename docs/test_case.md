@@ -417,7 +417,7 @@ không cộng vào số Pass. Những TC không được chọn trong lần ch�
 ## 6. Quản lý commit
 
 - Commit bộ khung, Page Objects và tài liệu kế hoạch riêng, trước các commit TC.
-- Mỗi TC có một file như tests/login/test_lg01_form.py; commit chứa mã và cập nhật tài liệu của đúng TC đó.
+- Toàn bộ TC nằm trong `tests/login/test_login_cases.py`; sau mỗi TC mới, commit riêng phần mã và cập nhật tài liệu của TC đó.
 - Kiểm tra từng TC trước commit; ghi đúng Not Run/Blocked nếu chưa thực thi được.
 - Mẫu thông điệp: `test(LG-01): verify login form visibility`.
 - Không commit mật khẩu, profile trình duyệt, cookie hoặc cấu hình bí mật.
