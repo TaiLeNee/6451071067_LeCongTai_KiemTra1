@@ -85,3 +85,6 @@ class LoginPage(BasePage):
             lambda driver:
                 self.is_remember_selected() == selected
         )
+
+    def password_value(self):
+        return self.visible(self._PASSWORD).get_property("value")
