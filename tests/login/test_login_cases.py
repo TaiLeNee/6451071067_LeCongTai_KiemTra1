@@ -68,3 +68,13 @@ def test_lg09_whitespace_username(login_page):
     login_page.fill_credentials("   ", "sample-password")
     login_page.submit()
     assert_rejected(login_page, "Tài khoản hoặc mật khẩu không đúng.")
+
+
+def test_lg10_whitespace_password(login_page):
+    data = require_env(
+        "UTC_TEST_USERNAME", "UTC_TEST_PASSWORD",
+        "UTC_INVALID_CREDENTIALS_TEXT",
+    )
+    assert data["UTC_TEST_PASSWORD"] != "   "
+    login_page.login(data["UTC_TEST_USERNAME"], "   ")
+    assert_rejected(login_page, data["UTC_INVALID_CREDENTIALS_TEXT"])
