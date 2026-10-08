@@ -199,3 +199,14 @@ def test_lg17_keyboard_navigation_and_entry(login_page):
     assert login_page.driver.switch_to.active_element == username
     assert login_page.username_value() == "keyboard_test"
     assert login_page.password_value() == "sample-password"
+
+
+def test_lg18_refresh_keeps_authenticated_session(login_page):
+    data = require_env(
+        "UTC_TEST_USERNAME", "UTC_TEST_PASSWORD",
+        "UTC_AUTH_IDENTITY_SELECTOR", "UTC_AUTH_IDENTITY_TEXT",
+    )
+    login_page.login(data["UTC_TEST_USERNAME"], data["UTC_TEST_PASSWORD"])
+    assert_authenticated(login_page.driver)
+    login_page.driver.refresh()
+    assert_authenticated(login_page.driver)
