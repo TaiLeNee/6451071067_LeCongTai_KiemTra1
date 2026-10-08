@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -169,3 +171,17 @@ def test_lg15_forgot_password_navigation(login_page):
     recovery = login_page.driver.find_element(By.TAG_NAME, "body").text
     assert "Trở lại đăng nhập?" in recovery
     assert login_page.driver.find_elements(By.CSS_SELECTOR, "input")
+
+
+def test_lg16_email_login_navigation(login_page):
+    link = login_page.visible(login_page._EMAIL_LOGIN)
+    assert urlparse(link.get_attribute("href")).hostname == "accounts.google.com"
+    original = set(login_page.driver.window_handles)
+    login_page.email_login()
+    new_windows = set(login_page.driver.window_handles) - original
+    if new_windows:
+        login_page.driver.switch_to.window(new_windows.pop())
+    WebDriverWait(login_page.driver, 15).until(
+        lambda driver: urlparse(driver.current_url).hostname == "accounts.google.com"
+    )
+    assert login_page.driver.find_element(By.TAG_NAME, "body").is_displayed()
