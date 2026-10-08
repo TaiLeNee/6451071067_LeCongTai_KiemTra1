@@ -88,3 +88,20 @@ class LoginPage(BasePage):
 
     def password_value(self):
         return self.visible(self._PASSWORD).get_property("value")
+
+    def username_value(self):
+        return self.visible(self._USERNAME).get_property("value")
+
+    def error_text(self):
+        return self.visible((By.CSS_SELECTOR, "form .error")).text.strip()
+
+    def forgot_password(self):
+        self.click(self._FORGOT_PASSWORD)
+
+    def email_login(self):
+        self.click(self._EMAIL_LOGIN)
+
+    def submit_with_enter(self):
+        from selenium.webdriver.common.keys import Keys
+
+        self.visible(self._PASSWORD).send_keys(Keys.ENTER)
