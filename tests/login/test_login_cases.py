@@ -257,3 +257,24 @@ def test_lg21_username_edge_whitespace_policy(login_page):
         assert_authenticated(login_page.driver)
     else:
         assert_rejected(login_page, data["UTC_INVALID_CREDENTIALS_TEXT"])
+
+
+def test_lg22_username_case_policy(login_page):
+    data = require_env(
+        "UTC_TEST_USERNAME", "UTC_TEST_PASSWORD",
+        "UTC_CASE_VARIANT_USERNAME", "UTC_USERNAME_CASE_POLICY",
+    )
+    variant = data["UTC_CASE_VARIANT_USERNAME"]
+    assert variant != data["UTC_TEST_USERNAME"]
+    assert variant.lower() == data["UTC_TEST_USERNAME"].lower()
+    policy = data["UTC_USERNAME_CASE_POLICY"].lower()
+    assert policy in {"insensitive", "sensitive"}
+    if policy == "insensitive":
+        require_env("UTC_AUTH_IDENTITY_SELECTOR", "UTC_AUTH_IDENTITY_TEXT")
+    else:
+        require_env("UTC_INVALID_CREDENTIALS_TEXT")
+    login_page.login(variant, data["UTC_TEST_PASSWORD"])
+    if policy == "insensitive":
+        assert_authenticated(login_page.driver)
+    else:
+        assert_rejected(login_page, data["UTC_INVALID_CREDENTIALS_TEXT"])
